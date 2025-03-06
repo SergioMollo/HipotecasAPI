@@ -37,3 +37,5 @@ Rutas admitidas:
 - /clientes [GET, POST]
 - /cliente/<dni_cliente> [GET, POST, PUT, DELETE]
 - /cliente/<dni_cliente>/hipoteca [POST]
+
+La documentacion generada a partir de la herramienta POSTMAN se puede encontrar en el siguiente enlace https://documenter.getpostman.com/view/29811506/2sAYdmmoZZ.
