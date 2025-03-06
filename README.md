@@ -33,7 +33,7 @@ Para obtener y clonar el repositorio se debe tener instalado Git.
 5. Abrir el navegador para acceder a la url generada
 - http://127.0.0.1:5000/
 
-Rutas generadas:
+Rutas admitidas:
 - /clientes [GET, POST]
 - /cliente/<dni_cliente> [GET, POST, PUT, DELETE]
 - /cliente/<dni_cliente>/hipoteca [POST]
