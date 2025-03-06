@@ -4,6 +4,7 @@ DATABASE_NAME = "hipotecaAPI.db"
 
 def get_db():
     db = sqlite3.connect(DATABASE_NAME)
+    db.row_factory = sqlite3.Row
     return db
 
 def create_tables():

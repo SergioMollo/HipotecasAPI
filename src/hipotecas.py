@@ -1,12 +1,12 @@
 from flask import Flask, request
 from database import get_db
 import re
+import sqlite3
 
 DNI_EXPRESION = "[0-9]{8}[A-Z]"
 DIGITO_CONTROL = "TRWAGMYFPDXBNJZSQVHLCKE"
 EMAIL_EXPRESION = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 NOMBRE_EXPRESION = "[A-Z][a-zA-Z]+"
-
 
 app = Flask(__name__)
 
@@ -25,7 +25,13 @@ def obtieneClientes():
     cursor = db.cursor()
     query = "SELECT dni_cliente, nombre, email, capital FROM clientes"
     cursor.execute(query)
-    return cursor.fetchall()
+    clientes_data = cursor.fetchall()
+    clientes = []
+
+    for cliente in clientes_data:  
+        clientes.append(dict(cliente))
+
+    return clientes
 
 def obtieneCliente(dni_cliente):
     if comprobarDNI(dni_cliente):
@@ -33,12 +39,21 @@ def obtieneCliente(dni_cliente):
         cursor = db.cursor()
         query = "SELECT dni_cliente, nombre, email, capital FROM clientes WHERE dni_cliente = ?"
         cursor.execute(query, [dni_cliente])
+        cliente = cursor.fetchone()
 
         cursor2 = db.cursor()
         query2 = "SELECT tae, plazo, cuota_mensual, importe_total FROM hipotecas WHERE dni_cliente = ?"
         cursor2.execute(query2, [dni_cliente])
+        hipoteca = cursor2.fetchone()
 
-        return [cursor.fetchone(), cursor2.fetchone()]
+        if not cliente:
+            return None  
+        hipoteca = dict(hipoteca) if hipoteca else None
+
+        cliente = dict(cliente)
+        cliente["hipoteca"] = hipoteca
+
+        return [cliente]
     return None
 
 def eliminaCliente(dni_cliente):

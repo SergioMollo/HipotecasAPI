@@ -19,7 +19,7 @@ def crearCliente():
     return make_response(jsonify(hipotecas.crearCliente(dni_cliente, nombre, email, capital)), 200)
 
 @app.route('/clientes', methods=['GET'])
-def obtenerClienteS():
+def obtenerClientes():
     return make_response(jsonify(hipotecas.obtieneClientes()), 200)
 
 @app.route('/cliente/<dni_cliente>', methods=['GET'])
@@ -32,7 +32,7 @@ def obtieneCliente(dni_cliente):
 
 @app.route('/cliente/<dni_cliente>', methods=['DELETE'])
 def eliminaCliente(dni_cliente):
-    return make_response(jsonify(hipotecas.eliminaCliente(dni_cliente)), 204)
+    return make_response(jsonify(hipotecas.eliminaCliente(dni_cliente)), 200)
 
 @app.route('/cliente/<dni_cliente>', methods=['PUT'])
 def modificaCliente(dni_cliente):
