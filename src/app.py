@@ -6,8 +6,10 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def index():
-    return "Bienvenidos al sistema de hipotecas"
+    return "Bienvenid@ a la API del sistema de simulaciónhipotecas"
 
+# Crea un nuevo cliente en el sistema
+#   Indica dni, nombre, email y capital
 @app.route('/clientes', methods=['POST'])
 def crearCliente():
     compruebaJSON()
@@ -18,10 +20,12 @@ def crearCliente():
     capital = cliente['capital']
     return make_response(jsonify(hipotecas.crearCliente(dni_cliente, nombre, email, capital)), 200)
 
+# Obtiene los clientes registrados en el sistema
 @app.route('/clientes', methods=['GET'])
 def obtenerClientes():
     return make_response(jsonify(hipotecas.obtieneClientes()), 200)
 
+# Obtiene un cliente registrado en el sistema mediante su dni
 @app.route('/cliente/<dni_cliente>', methods=['GET'])
 def obtieneCliente(dni_cliente):
     cliente = hipotecas.obtieneCliente(dni_cliente)
@@ -30,10 +34,13 @@ def obtieneCliente(dni_cliente):
     else:
         return make_response(jsonify(cliente), 404)
 
+# Elimina un cliente registrado en el sistema mediante su dni
 @app.route('/cliente/<dni_cliente>', methods=['DELETE'])
 def eliminaCliente(dni_cliente):
     return make_response(jsonify(hipotecas.eliminaCliente(dni_cliente)), 200)
 
+# Actualiza la informacion un cliente registrado en el sistema mediante su dni
+#   Indica dni, nombre, email y capital
 @app.route('/cliente/<dni_cliente>', methods=['PUT'])
 def modificaCliente(dni_cliente):
     compruebaJSON()
@@ -43,6 +50,8 @@ def modificaCliente(dni_cliente):
     capital = cliente['capital']
     return make_response(jsonify(hipotecas.modificaCliente(dni_cliente, nombre, email, capital)), 200)
 
+# Solicita la simulacion de la hipoteca un cliente registrado en el sistema mediante su dni
+#  Indica dni, plazo y tae
 @app.route('/cliente/<dni_cliente>/hipoteca', methods=['POST'])
 def solicitaSimulacion(dni_cliente):
     compruebaJSON()

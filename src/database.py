@@ -2,11 +2,13 @@ import sqlite3
 
 DATABASE_NAME = "hipotecaAPI.db"
 
+# Inicializa la base de datos
 def get_db():
     db = sqlite3.connect(DATABASE_NAME)
     db.row_factory = sqlite3.Row
     return db
 
+# Crea las tablas de la base de datos si no existen
 def create_tables():
     tables = [
         """CREATE TABLE IF NOT EXISTS clientes(
