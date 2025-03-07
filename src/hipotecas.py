@@ -15,16 +15,22 @@ def crearCliente(dni_cliente, nombre, email, capital):
     if comprobarDNI(dni_cliente) and comprobarNombre(nombre) and comprobarEmail(email) and comprobarFloat(capital):
         db = get_db()
         cursor = db.cursor()
-        try:
-            query = "INSERT INTO clientes(dni_cliente, nombre, email, capital) VALUES (?, ?, ?, ?)"
-            cursor.execute(query, [dni_cliente, nombre, email, capital])
-            db.commit()
-            return True
-        except sqlite3.IntegrityError as e:
-            return f"Error al insertar datos: {e}"
-        except sqlite3.Error as e:
-            return f"Error al insertar datos: {e}"
-    return False
+        query = "SELECT * FROM clientes WHERE dni_cliente = ?"
+        cursor.execute(query, [dni_cliente])
+
+        if cursor.fetchone() is None:
+            try:
+                query = "INSERT INTO clientes(dni_cliente, nombre, email, capital) VALUES (?, ?, ?, ?)"
+                cursor.execute(query, [dni_cliente, nombre, email, capital])
+                db.commit()
+                return f"Cliente registrado correctamente"
+            except sqlite3.IntegrityError as e:
+                return f"Error al insertar datos: {e}"
+            except sqlite3.Error as e:
+                return f"Error al insertar datos: {e}"
+        else:
+            return f"El dni introducido ya está registrado"
+    return f"Los datos introducidos no son correctos"
 
 
 # Obtiene los clientes registrados en el sistema
@@ -72,59 +78,73 @@ def eliminaCliente(dni_cliente):
     if comprobarDNI(dni_cliente):
         db = get_db()
         cursor = db.cursor()
-        try:
-            query = "DELETE FROM clientes WHERE dni_cliente = ?"
-            cursor.execute(query, [dni_cliente])
-            query = "DELETE FROM hipotecas WHERE dni_cliente = ?"
-            cursor.execute(query, [dni_cliente])
-            db.commit()
-            return True
-        except sqlite3.IntegrityError as e:
-            return f"Error al eliminar datos: {e}"
-        except sqlite3.Error as e:
-            return f"Error al eliminar datos: {e}"
-    return False
+        query = "SELECT * FROM clientes WHERE dni_cliente = ?"
+        cursor.execute(query, [dni_cliente])
+
+        if cursor.fetchone() is not None:
+            try:
+                query = "DELETE FROM clientes WHERE dni_cliente = ?"
+                cursor.execute(query, [dni_cliente])
+                query = "DELETE FROM hipotecas WHERE dni_cliente = ?"
+                cursor.execute(query, [dni_cliente])
+                db.commit()
+                return f"Cliente eliminado correctamente"
+            except sqlite3.IntegrityError as e:
+                return f"Error al eliminar datos: {e}"
+            except sqlite3.Error as e:
+                return f"Error al eliminar datos: {e}"
+        else:
+            return f"El dni introducido no está registrado"
+    return f"El dni introducido no es correcto"
 
 # Actualiza la informacion un cliente registrado en el sistema mediante su dni, nombre, email y capital
 def modificaCliente(dni_cliente, nombre, email, capital):
     if comprobarDNI(dni_cliente) and comprobarNombre(nombre) and comprobarEmail(email) and comprobarFloat(capital):
         db = get_db()
         cursor = db.cursor()
-        try:
-            query = "UPDATE clientes SET nombre = ?, email = ?, capital = ? WHERE dni_cliente = ?"
-            cursor.execute(query, [nombre, email, capital, dni_cliente])
-            db.commit()
-            return True
-        except sqlite3.IntegrityError as e:
-            return f"Error al modificar datos: {e}"
-        except sqlite3.Error as e:
-            return f"Error al modificar datos: {e}"
-    return False
+        query = "SELECT * FROM clientes WHERE dni_cliente = ?"
+        cursor.execute(query, [dni_cliente])
+
+        if cursor.fetchone() is not None:
+            try:
+                query = "UPDATE clientes SET nombre = ?, email = ?, capital = ? WHERE dni_cliente = ?"
+                cursor.execute(query, [nombre, email, capital, dni_cliente])
+                db.commit()
+                return f"Informacion del cliente modificada correctamente"
+            except sqlite3.IntegrityError as e:
+                return f"Error al modificar datos: {e}"
+            except sqlite3.Error as e:
+                return f"Error al modificar datos: {e}"
+        else:
+            return f"El dni introducido no está registrado"
+    return f"Los datos introducidos no son correctos"
 
 # Simula el calculo de la hipoteca un cliente registrado en el sistema mediante su dni, tae y plazo
 def solicitaSimulacion(dni_cliente, tae, plazo):
     if comprobarDNI(dni_cliente) and comprobarFloat(tae) and comprobarFloat(plazo):
         db = get_db()
         cursor = db.cursor()
-
         query = "SELECT capital FROM clientes WHERE dni_cliente = ?"
         cursor.execute(query, [dni_cliente])
         result = cursor.fetchone()
-        
-        capital = result[0]
-        cuota = calculaCuota(capital, tae, plazo)
-        importe = cuota * plazo
 
-        try:
-            query = "INSERT INTO hipotecas(dni_cliente, tae, plazo, cuota_mensual, importe_total) VALUES (?, ?, ?, ?, ?)"
-            cursor.execute(query, [dni_cliente, tae, plazo, cuota, importe])
-            db.commit()
-            return True
-        except sqlite3.IntegrityError as e:
-            return f"Error al modificar datos: {e}"
-        except sqlite3.Error as e:
-            return f"Error al modificar datos: {e}"
-    return False
+        if result is not None:
+            capital = result[0]
+            cuota = calculaCuota(capital, tae, plazo)
+            importe = cuota * plazo
+
+            try:
+                query = "INSERT INTO hipotecas(dni_cliente, tae, plazo, cuota_mensual, importe_total) VALUES (?, ?, ?, ?, ?)"
+                cursor.execute(query, [dni_cliente, tae, plazo, cuota, importe])
+                db.commit()
+                return f"Simulacion de hipoteca realizada correctamente"
+            except sqlite3.IntegrityError as e:
+                return f"Error al modificar datos: {e}"
+            except sqlite3.Error as e:
+                return f"Error al modificar datos: {e}"
+        else:
+            return f"El dni introducido no está registrado"
+    return f"Los datos introducidos no son correctos"
 
 # Comprueba la validez del dni segun el algoritmo oficial
 def comprobarDNI(dni):
@@ -163,7 +183,6 @@ def comprobarFloat(valor):
 #	capital es el importe del préstamo hipotecario
 #	i es el tipo de interés mensual (TAE / 100 / 12)
 #	n es el número de meses del plazo de amortización (plazo * 12)
-
 def calculaCuota(capital, tae, plazo):
     interes = tae / 100 / 12
     meses = plazo * 12
